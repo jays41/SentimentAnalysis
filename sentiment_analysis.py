@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from typing import Set, List, Tuple
+from concurrent.futures import ThreadPoolExecutor
 
 class Config:
     # Sentiment Analysis settings
     MIN_HEADLINE_LENGTH = 5
+    MAX_WORKERS = 3
 
     SENTIMENT_WEIGHTS = {
         'positive': 1.0,
@@ -26,34 +28,35 @@ class Config:
         'negative': '#e74c3c'
     }
 
+
 class NewsScraper:
     def __init__(self, stock_symbol: str):
         self.stock_symbol = stock_symbol
         self.short_name = self.get_company_short_name(stock_symbol)
+        self.config = Config()
 
     def get_all_headlines(self) -> Set[str]:
-        if self.short_name is None:
-            st.error('Invalid input parameters, unable to execute')
+        if not self.short_name:
             return set()
 
-        headlines = []
-        try:
-            # CNBC Headlines
-            cnbc_headlines = self.get_cnbc_headlines()
+        with ThreadPoolExecutor(max_workers=self.config.MAX_WORKERS) as executor:
+            future_cnbc = executor.submit(self.get_cnbc_headlines)
+            future_yf = executor.submit(self.get_yf_headlines)
 
-            # Yahoo Finance Headlines
-            yf_headlines = self.get_yf_headlines()
+            headlines = []
+            for future in [future_cnbc, future_yf]:
+                try:
+                    headlines.extend(future.result())
+                except Exception as e:
+                    st.error(f"Error fetching headlines: {str(e)}")
 
-            headlines = [
-                headline for headline in (cnbc_headlines + yf_headlines) 
+        headlines = [
+                headline for headline in headlines 
                 if (self.stock_symbol.lower() in headline.lower() or 
                     self.short_name.lower() in headline.lower())
                 ]
 
-            return set(headlines)
-        except Exception as e:
-            st.error(f"Error retrieving headlines: {e}")
-            return set()
+        return set(headlines)
 
     def get_company_short_name(self, symbol: str) -> str:
         try:
