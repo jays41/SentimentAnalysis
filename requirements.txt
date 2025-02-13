@@ -1,0 +1,9 @@
+streamlit>=1.22.0
+yfinance>=0.2.18
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+torch>=2.0.0
+pandas>=2.0.0
+plotly>=5.14.0
+matplotlib>=3.7.1
+transformers>=4.30.0
