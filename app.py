@@ -32,9 +32,10 @@ st.sidebar.title("Stock Sentiment Analyzer")
 st.sidebar.write("Analyze sentiment from financial news")
 
 selected_stock = ""
-st.title(f"Stock Sentiment Analysis{ ":" if selected_stock else "" } {selected_stock}")
+st.title(f"Stock Sentiment Analysis")
 selected_stock = st.text_input("Enter a stock symbol:").upper()
-
+if selected_stock:
+    st.write(f"Selected stock: {selected_stock}")
 
 
 st.sidebar.subheader("Settings")
@@ -50,6 +51,9 @@ with st.sidebar.expander("About"):
     This app analyzes sentiment from financial news using the FinBERT model.
     It is a Python-based sentiment analysis tool that evaluates market sentiment through financial news headlines and quarterly reports using FinBERT.
     This program aggregates headlines from multiple sources to provide sentiment insights.
+    
+    
+    If you have any suggestions, feel free to drop me a message at jay.1.shah@kcl.ac.uk
     """)
 
 tab1, tab2 = st.tabs(["Analysis", "Raw Data"])
@@ -58,6 +62,9 @@ results = Results()
 
 with tab1:
     def run_analysis():
+        if not selected_stock:
+            st.warning("Please enter a valid stock")
+            return False, Results()
         with st.spinner(f"Analyzing sentiment for {selected_stock}..."):
             config = Config()
             config.stock_symbol = selected_stock
