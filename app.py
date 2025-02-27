@@ -102,13 +102,19 @@ with tab1:
                 st.code(traceback.format_exc())
                 return False, local_results
     
+    success = False
+    analyze_button = st.button("Analyze Sentiment", type="primary", use_container_width=True)
+    if analyze_button:
+            success, results = run_analysis()
+            if results.headline_count == 0:
+                success = False
+                results = Results()
+    
     # Analysis section
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        analyze_button = st.button("Analyze Sentiment", type="primary", use_container_width=True)
-        if analyze_button:
-            success, results = run_analysis()
+        if True:
             if success:
                 # Display sentiment gauge chart
                 st.subheader("Sentiment Score")
