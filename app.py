@@ -31,58 +31,44 @@ st.set_page_config(
 st.sidebar.title("Stock Sentiment Analyzer")
 st.sidebar.write("Analyze sentiment from financial news")
 
-# Default stock symbols and add custom input
-default_stocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA']
-selected_stock = st.sidebar.selectbox(
-    "Select a stock symbol:",
-    default_stocks
-)
+selected_stock = st.text_input("Enter a stock symbol:")
 
-custom_stock = st.sidebar.text_input("Or enter a custom stock symbol:")
-if custom_stock:
-    selected_stock = custom_stock.upper()
 
-# Data source options
-st.sidebar.subheader("Data Sources")
+
+st.sidebar.subheader("Settings")
 use_cnbc = st.sidebar.checkbox("Use CNBC News", value=True)
 use_yf = st.sidebar.checkbox("Use Yahoo Finance", value=True)
-use_quarterly = st.sidebar.checkbox("Use Quarterly Reports (Apple only)", value=True)
+use_quarterly = st.sidebar.checkbox("Use Quarterly Reports (Apple only)", value=True) if selected_stock == 'AAPL' else False
 
-# Advanced options
+
+
 st.sidebar.subheader("Advanced Options")
-min_headline_length = st.sidebar.slider("Minimum headline length", 3, 15, 5)
-show_raw_headlines = st.sidebar.checkbox("Show raw headlines", value=False)
 show_stock_price = st.sidebar.checkbox("Show stock price chart", value=True)
+# change the colour of the plots
 
 # About section
 with st.sidebar.expander("About"):
     st.write("""
     This app analyzes sentiment from financial news using the FinBERT model.
-    It collects headlines from various sources and calculates sentiment scores.
-    
-    Positive scores indicate bullish sentiment, negative scores indicate bearish sentiment.
+    FinBert is a Python-based sentiment analysis tool that evaluates market sentiment through financial news headlines and quarterly reports using FinBERT.
+    This program aggregates headlines from multiple sources to provide sentiment insights.
     """)
 
-# Main content
+
 st.title(f"Stock Sentiment Analysis: {selected_stock}")
 
-# Create tabs
-tab1, tab2, tab3 = st.tabs(["Analysis", "Visualization", "Raw Data"])
+tab1, tab2 = st.tabs(["Analysis", "Raw Data"])
 
 with tab1:
-    # Define function to run analysis
     def run_analysis():
         with st.spinner(f"Analyzing sentiment for {selected_stock}..."):
-            # Configure analysis based on sidebar options
             config = Config()
             config.stock_symbol = selected_stock
             config.USE_CNBC = use_cnbc
             config.USE_YF = use_yf
             config.USE_QUARTERLY_REVIEW = use_quarterly and selected_stock == 'AAPL'
-            config.MIN_HEADLINE_LENGTH = min_headline_length
             
             try:
-                # Initialize sentiment analyzer
                 analyzer = SentimentAnalyser(selected_stock)
                 
                 # Collect headlines
@@ -91,14 +77,9 @@ with tab1:
                 scraper = NewsScraper(selected_stock)
                 headlines = scraper.get_all_headlines()
                 
-                # Display headline count
                 progress_text.text(f"Analyzing {len(headlines)} headlines...")
+                st.session_state.headlines = list(headlines)
                 
-                # If show_raw_headlines is enabled, store headlines for later display
-                if show_raw_headlines:
-                    st.session_state.headlines = list(headlines)
-                
-                # Run sentiment analysis
                 result = analyzer.analyse_sentiment(headlines)
                 
                 # Store results in session state
@@ -196,7 +177,7 @@ with tab1:
         else:
             st.info("Click 'Analyze Sentiment' to run the analysis")
 
-with tab2:
+# with tab2:
     if "analysis_complete" in st.session_state and st.session_state.analysis_complete:
         viz_type = st.radio(
             "Select visualization type:",
@@ -307,9 +288,9 @@ with tab2:
 
         else:
             st.error("No data found for the given ticker. Please try a different one.")
-with tab3:
+with tab2:
     if "analysis_complete" in st.session_state and st.session_state.analysis_complete:
-        if show_raw_headlines and "headlines" in st.session_state:
+        if "headlines" in st.session_state:
             st.subheader("Raw Headlines Used for Analysis")
             
             # Create a dataframe for the headlines
