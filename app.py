@@ -17,7 +17,7 @@ import traceback
 import plotly.express as px
 
 # Import from existing script
-from sentiment_analysis import Config, SentimentAnalyser, NewsScraper
+from sentiment_analysis import Config, SentimentAnalyser, NewsScraper, Results
 
 # Set page configuration
 st.set_page_config(
@@ -31,7 +31,9 @@ st.set_page_config(
 st.sidebar.title("Stock Sentiment Analyzer")
 st.sidebar.write("Analyze sentiment from financial news")
 
-selected_stock = st.text_input("Enter a stock symbol:")
+selected_stock = ""
+st.title(f"Stock Sentiment Analysis{ ":" if selected_stock else "" } {selected_stock}")
+selected_stock = st.text_input("Enter a stock symbol:").upper()
 
 
 
@@ -39,25 +41,20 @@ st.sidebar.subheader("Settings")
 use_cnbc = st.sidebar.checkbox("Use CNBC News", value=True)
 use_yf = st.sidebar.checkbox("Use Yahoo Finance", value=True)
 use_quarterly = st.sidebar.checkbox("Use Quarterly Reports (Apple only)", value=True) if selected_stock == 'AAPL' else False
-
-
-
-st.sidebar.subheader("Advanced Options")
 show_stock_price = st.sidebar.checkbox("Show stock price chart", value=True)
+show_raw_headlines = st.sidebar.checkbox("Show raw headlines")
 # change the colour of the plots
 
-# About section
 with st.sidebar.expander("About"):
     st.write("""
     This app analyzes sentiment from financial news using the FinBERT model.
-    FinBert is a Python-based sentiment analysis tool that evaluates market sentiment through financial news headlines and quarterly reports using FinBERT.
+    It is a Python-based sentiment analysis tool that evaluates market sentiment through financial news headlines and quarterly reports using FinBERT.
     This program aggregates headlines from multiple sources to provide sentiment insights.
     """)
 
-
-st.title(f"Stock Sentiment Analysis: {selected_stock}")
-
 tab1, tab2 = st.tabs(["Analysis", "Raw Data"])
+
+results = Results()
 
 with tab1:
     def run_analysis():
@@ -71,6 +68,8 @@ with tab1:
             try:
                 analyzer = SentimentAnalyser(selected_stock)
                 
+                local_results = Results()
+                
                 # Collect headlines
                 progress_text = st.empty()
                 progress_text.text("Collecting news headlines...")
@@ -78,38 +77,36 @@ with tab1:
                 headlines = scraper.get_all_headlines()
                 
                 progress_text.text(f"Analyzing {len(headlines)} headlines...")
-                st.session_state.headlines = list(headlines)
+                local_results.headlines = list(headlines)
                 
                 result = analyzer.analyse_sentiment(headlines)
                 
-                # Store results in session state
-                st.session_state.result = result
-                st.session_state.total_positive = analyzer.total_positive
-                st.session_state.total_neutral = analyzer.total_neutral
-                st.session_state.total_negative = analyzer.total_negative
-                st.session_state.headline_count = len(headlines)
-                st.session_state.analysis_complete = True
+                local_results.score = result
+                local_results.total_positive = analyzer.total_positive
+                local_results.total_neutral = analyzer.total_neutral
+                local_results.total_negative = analyzer.total_negative
+                local_results.headline_count = len(headlines)
+                local_results.analysis_complete = True
                 
                 progress_text.text("Analysis complete!")
-                return True
+                return True, local_results
             except Exception as e:
                 st.error(f"An error occurred during analysis: {str(e)}")
                 st.code(traceback.format_exc())
-                return False
+                return False, local_results
     
     # Analysis section
     col1, col2 = st.columns([2, 1])
     
     with col1:
         analyze_button = st.button("Analyze Sentiment", type="primary", use_container_width=True)
-        
         if analyze_button:
-            success = run_analysis()
+            success, results = run_analysis()
             if success:
                 # Display sentiment gauge chart
                 st.subheader("Sentiment Score")
                 
-                score = st.session_state.result
+                score = results.score
                 sentiment_label = "Positive" if score > 0 else "Negative" if score < 0 else "Neutral"
                 sentiment_color = "#2ecc71" if score > 0 else "#e74c3c" if score < 0 else "#74B9FF"
                 
@@ -139,16 +136,16 @@ with tab1:
                 st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        if "analysis_complete" in st.session_state and st.session_state.analysis_complete:
+        if results.analysis_complete:
             st.subheader("Summary")
             
             # Create a dataframe for the summary
             data = pd.DataFrame({
                 'Sentiment': ['Positive', 'Neutral', 'Negative'],
                 'Score': [
-                    st.session_state.total_positive,
-                    st.session_state.total_neutral,
-                    st.session_state.total_negative
+                    results.total_positive,
+                    results.total_neutral,
+                    results.total_negative
                 ]
             })
             
@@ -158,12 +155,12 @@ with tab1:
             # Show summary stats
             st.metric(
                 label="Overall Score", 
-                value=f"{st.session_state.result:.2f}",
-                delta=f"{st.session_state.result * 100:.1f}%" 
+                value=f"{results.score:.2f}",
+                delta=f"{results.score * 100:.1f}%" 
             )
             st.metric(
                 label="Headlines Analyzed", 
-                value=st.session_state.headline_count
+                value=results.headline_count
             )
             
             # Show a summary table
@@ -177,8 +174,7 @@ with tab1:
         else:
             st.info("Click 'Analyze Sentiment' to run the analysis")
 
-# with tab2:
-    if "analysis_complete" in st.session_state and st.session_state.analysis_complete:
+    if results.analysis_complete:
         viz_type = st.radio(
             "Select visualization type:",
             ["Bar Chart", "Pie Chart"]
@@ -189,9 +185,9 @@ with tab1:
             data = pd.DataFrame({
                 'Sentiment': ['Positive', 'Neutral', 'Negative'],
                 'Score': [
-                    st.session_state.total_positive,
-                    st.session_state.total_neutral,
-                    st.session_state.total_negative
+                    results.total_positive,
+                    results.total_neutral,
+                    results.total_negative
                 ]
             })
             
@@ -224,9 +220,9 @@ with tab1:
             data = pd.DataFrame({
                 'Sentiment': ['Positive', 'Neutral', 'Negative'],
                 'Score': [
-                    st.session_state.total_positive,
-                    st.session_state.total_neutral,
-                    st.session_state.total_negative
+                    results.total_positive,
+                    results.total_neutral,
+                    results.total_negative
                 ]
             })
             
@@ -288,14 +284,15 @@ with tab1:
 
         else:
             st.error("No data found for the given ticker. Please try a different one.")
-with tab2:
-    if "analysis_complete" in st.session_state and st.session_state.analysis_complete:
-        if "headlines" in st.session_state:
+
+if show_raw_headlines:
+    if results.analysis_complete:
+        if results.headline_count > 0:
             st.subheader("Raw Headlines Used for Analysis")
             
             # Create a dataframe for the headlines
             headline_df = pd.DataFrame({
-                "Headline": st.session_state.headlines
+                "Headline": results.headlines
             })
             
             # Add a filter
