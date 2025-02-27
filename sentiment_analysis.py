@@ -63,7 +63,9 @@ class SentimentAnalyser:
   def execute(self):
     scraper = NewsScraper(self.stock_symbol)
     unique_headlines = scraper.get_all_headlines()
-    
+    if len(unique_headlines) == 0:
+      return
+   
     # Check if we have any headlines to analyze
     if not unique_headlines:
       print("No headlines found to analyze. Using default company info for analysis.")
@@ -255,8 +257,8 @@ class NewsScraper:
 
     # If no headlines were found, add a default one to prevent errors
     if not headlines:
-      print("No headlines found from any source. Adding default headline.")
-      headlines.append(f"Latest news about {self.stock_symbol}")
+      print("No headlines found from any source.")
+      return []
 
     unique_headlines = set(headlines)  # Removes the duplicate headlines
     return unique_headlines
