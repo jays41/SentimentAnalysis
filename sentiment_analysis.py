@@ -13,6 +13,15 @@ from matplotlib.patches import Rectangle
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
 
+class Results:
+  total_positive = 0
+  total_neutral = 0
+  total_negative = 0
+  score = 0
+  headline_count = 0
+  headlines = []
+  analysis_complete = False
+
 class Config:
   # Sentiment Analysis settings
   stock_symbol = 'AAPL'
