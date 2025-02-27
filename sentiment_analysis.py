@@ -18,7 +18,7 @@ class Results:
   total_neutral = 0
   total_negative = 0
   score = 0
-  headline_count = 0
+  headline_count = -1
   headlines = []
   analysis_complete = False
 
