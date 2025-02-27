@@ -289,6 +289,9 @@ with tab2:
             c1.metric("Current Price", f"${latest_close:.2f}")
             c2.metric("1-Month Change", f"{change_pct:.2f}%", delta=f"{change_pct:.1f}%")
 
+            # Flatten column names if they are multi-indexed
+            data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
+            
             # Plot using Plotly Express
             fig = px.line(data, x='Date', y=y_values, title=f'{selected_stock} Stock Closing Price Over the Last Month')
 
