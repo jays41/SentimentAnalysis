@@ -95,7 +95,11 @@ with tab1:
                 local_results.headline_count = len(headlines)
                 local_results.analysis_complete = True
                 
-                progress_text.text("Analysis complete!")
+                if len(headlines) > 0:
+                    progress_text.text("Analysis complete!")
+                else:
+                    st.warning("An error occurred: check the stock ticker is valid")
+                    
                 return True, local_results
             except Exception as e:
                 st.error(f"An error occurred during analysis: {str(e)}")
@@ -114,39 +118,38 @@ with tab1:
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        if True:
-            if success:
-                # Display sentiment gauge chart
-                st.subheader("Sentiment Score")
-                
-                score = results.score
-                sentiment_label = "Positive" if score > 0 else "Negative" if score < 0 else "Neutral"
-                sentiment_color = "#2ecc71" if score > 0 else "#e74c3c" if score < 0 else "#74B9FF"
-                
-                # Create a gauge chart with Plotly
-                fig = go.Figure(go.Indicator(
-                    mode="gauge+number+delta",
-                    value=score * 100,  # Convert to percentage
-                    domain={"x": [0, 1], "y": [0, 1]},
-                    title={"text": f"Sentiment: {sentiment_label}", "font": {"size": 24, "color": sentiment_color}},
-                    gauge={
-                        "axis": {"range": [-100, 100], "tickwidth": 1},
-                        "bar": {"color": sentiment_color},
-                        "steps": [
-                            {"range": [-100, -33], "color": "rgba(231, 76, 60, 0.3)"},
-                            {"range": [-33, 33], "color": "rgba(116, 185, 255, 0.3)"},
-                            {"range": [33, 100], "color": "rgba(46, 204, 113, 0.3)"}
-                        ],
-                        "threshold": {
-                            "line": {"color": "black", "width": 4},
-                            "thickness": 0.75,
-                            "value": score * 100
-                        }
+        if success:
+            # Display sentiment gauge chart
+            st.subheader("Sentiment Score")
+            
+            score = results.score
+            sentiment_label = "Positive" if score > 0 else "Negative" if score < 0 else "Neutral"
+            sentiment_color = "#2ecc71" if score > 0 else "#e74c3c" if score < 0 else "#74B9FF"
+            
+            # Create a gauge chart with Plotly
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number+delta",
+                value=score * 100,  # Convert to percentage
+                domain={"x": [0, 1], "y": [0, 1]},
+                title={"text": f"Sentiment: {sentiment_label}", "font": {"size": 24, "color": sentiment_color}},
+                gauge={
+                    "axis": {"range": [-100, 100], "tickwidth": 1},
+                    "bar": {"color": sentiment_color},
+                    "steps": [
+                        {"range": [-100, -33], "color": "rgba(231, 76, 60, 0.3)"},
+                        {"range": [-33, 33], "color": "rgba(116, 185, 255, 0.3)"},
+                        {"range": [33, 100], "color": "rgba(46, 204, 113, 0.3)"}
+                    ],
+                    "threshold": {
+                        "line": {"color": "black", "width": 4},
+                        "thickness": 0.75,
+                        "value": score * 100
                     }
-                ))
-                
-                fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
-                st.plotly_chart(fig, use_container_width=True)
+                }
+            ))
+            
+            fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+            st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         if results.analysis_complete:
