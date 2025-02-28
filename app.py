@@ -302,40 +302,90 @@ with tab1:
         data = yf.download(selected_stock, period='1mo', interval='1d')
 
         # Check if data was fetched properly
+        # if not data.empty:
+        #     # Reset the index to ensure 'Date' is a column
+        #     data.reset_index(inplace=True)
+
+        #     # Ensure 'Close' column is a Series, not a DataFrame
+        #     if 'Close' in data.columns:
+        #         y_values = data['Close'].squeeze()  # Convert to 1D if needed
+        #     else:
+        #         st.error("The 'Close' column is missing in the dataset.")
+        #         st.stop()
+            
+        #     latest_close = float(data['Close'].iloc[-1])
+        #     oldest_close = float(data['Close'].iloc[0])
+        #     change_pct = (latest_close - oldest_close) / oldest_close * 100
+        #     c1, c2 = st.columns(2)
+        #     c1.metric("Current Price", f"${latest_close:.2f}")
+        #     c2.metric("1-Month Change", f"{change_pct:.2f}%", delta=f"{change_pct:.1f}%")
+
+        #     # Flatten column names if they are multi-indexed
+        #     data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
+            
+        #     # Plot using Plotly Express
+        #     fig = px.line(data, x='Date', y=y_values, title=f'{selected_stock} Stock Closing Price Over the Last Month')
+
+        #     # Customize the layout
+        #     fig.update_layout(
+        #         xaxis_title='Date',
+        #         yaxis_title='Price in USD',
+        #         template='plotly_dark'
+        #     )
+
+        #     # Display the interactive plot
+        #     st.plotly_chart(fig)
+
+        # else:
+        #     st.error("No data found for the given ticker. Please try a different one.")
+        
         if not data.empty:
             # Reset the index to ensure 'Date' is a column
             data.reset_index(inplace=True)
 
-            # Ensure 'Close' column is a Series, not a DataFrame
+            # Ensure 'Close' column is present
             if 'Close' in data.columns:
                 y_values = data['Close'].squeeze()  # Convert to 1D if needed
             else:
                 st.error("The 'Close' column is missing in the dataset.")
                 st.stop()
             
+            # Compute price change
             latest_close = float(data['Close'].iloc[-1])
             oldest_close = float(data['Close'].iloc[0])
             change_pct = (latest_close - oldest_close) / oldest_close * 100
+
+            # Display metrics
             c1, c2 = st.columns(2)
             c1.metric("Current Price", f"${latest_close:.2f}")
             c2.metric("1-Month Change", f"{change_pct:.2f}%", delta=f"{change_pct:.1f}%")
 
-            # Flatten column names if they are multi-indexed
-            data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
-            
-            # Plot using Plotly Express
-            fig = px.line(data, x='Date', y=y_values, title=f'{selected_stock} Stock Closing Price Over the Last Month')
+            # Interactive Stock Chart with Plotly
+            fig = go.Figure()
 
-            # Customize the layout
+            fig.add_trace(go.Scatter(
+                x=data['Date'], 
+                y=y_values, 
+                mode='lines',
+                name='Closing Price',
+                line=dict(color='#1f77b4', width=2),
+            ))
+
             fig.update_layout(
+                title=f'{selected_stock} Stock Closing Price Over the Last Month',
                 xaxis_title='Date',
                 yaxis_title='Price in USD',
-                template='plotly_dark'
+                template='plotly_white',
+                autosize=True,  # Forces refresh
+                height=500,
+                hovermode="x",  # Interactive crosshair on hover
+                xaxis=dict(showspikes=True, spikemode="across", spikesnap="cursor"),
+                yaxis=dict(showspikes=True, spikemode="across"),
+                margin=dict(l=40, r=40, t=50, b=40)  # Adjust margins
             )
 
-            # Display the interactive plot
-            st.plotly_chart(fig)
-
+            # Show interactive chart
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.error("No data found for the given ticker. Please try a different one.")
 
