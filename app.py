@@ -249,19 +249,30 @@ with tab1:
         
         colors = ['#2ecc71', '#74B9FF', '#e74c3c']
         
-        fig = go.Figure(data=[go.Pie(
-            labels=data['Sentiment'],
-            values=data['Score'],
-            hole=.4,
-            marker_colors=colors
-        )])
+        # fig = go.Figure(data=[go.Pie(
+        #     labels=data['Sentiment'],
+        #     values=data['Score'],
+        #     hole=.4,
+        #     marker_colors=colors
+        # )])
         
-        fig.update_layout(
-            title=f'Sentiment Distribution for {selected_stock}',
-            annotations=[dict(text=f'{selected_stock}', x=0.5, y=0.5, font_size=20, showarrow=False)],
-            height=500
-        )
+        # fig.update_layout(
+        #     title=f'Sentiment Distribution for {selected_stock}',
+        #     annotations=[dict(text=f'{selected_stock}', x=0.5, y=0.5, font_size=20, showarrow=False)],
+        #     height=500
+        # )
         
+        # st.plotly_chart(fig, use_container_width=True)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Pie(
+            labels=['Positive', 'Neutral', 'Negative'],
+            values=[results.total_positive, results.total_neutral, results.total_negative],
+            hole=0.4,
+            marker_colors=['#2ecc71', '#74B9FF', '#e74c3c']
+        ))
+
+        fig.update_layout(autosize=True, newshape=dict(line=dict(color='black')))  # Force re-render
         st.plotly_chart(fig, use_container_width=True)
 
 
