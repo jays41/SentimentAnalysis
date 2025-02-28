@@ -191,73 +191,68 @@ with tab1:
             st.info("Click 'Analyze Sentiment' to run the analysis")
 
     if results.analysis_complete:
-        viz_type = st.radio(
-            "Select visualization type:",
-            ["Bar Chart", "Pie Chart"]
+        
+    
+        # bar chart
+        data = pd.DataFrame({
+            'Sentiment': ['Positive', 'Neutral', 'Negative'],
+            'Score': [
+                results.total_positive,
+                results.total_neutral,
+                results.total_negative
+            ]
+        })
+        
+        total = data['Score'].sum()
+        data['Percentage'] = data['Score'] / total * 100
+        
+        colors = ['#2ecc71', '#74B9FF', '#e74c3c']
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=data['Sentiment'],
+            y=data['Score'],
+            text=[f'{p:.1f}%' for p in data['Percentage']],
+            textposition='auto',
+            marker_color=colors
+        ))
+        
+        fig.update_layout(
+            title=f'Sentiment Analysis Results for {selected_stock}',
+            xaxis_title='Sentiment Category',
+            yaxis_title='Sentiment Score',
+            template='plotly_white',
+            height=500
         )
         
-        if viz_type == "Bar Chart":
-            # Create bar chart with Plotly
-            data = pd.DataFrame({
-                'Sentiment': ['Positive', 'Neutral', 'Negative'],
-                'Score': [
-                    results.total_positive,
-                    results.total_neutral,
-                    results.total_negative
-                ]
-            })
-            
-            total = data['Score'].sum()
-            data['Percentage'] = data['Score'] / total * 100
-            
-            colors = ['#2ecc71', '#74B9FF', '#e74c3c']
-            
-            fig = go.Figure()
-            fig.add_trace(go.Bar(
-                x=data['Sentiment'],
-                y=data['Score'],
-                text=[f'{p:.1f}%' for p in data['Percentage']],
-                textposition='auto',
-                marker_color=colors
-            ))
-            
-            fig.update_layout(
-                title=f'Sentiment Analysis Results for {selected_stock}',
-                xaxis_title='Sentiment Category',
-                yaxis_title='Sentiment Score',
-                template='plotly_white',
-                height=500
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-        elif viz_type == "Pie Chart":
-            # Create pie chart with Plotly
-            data = pd.DataFrame({
-                'Sentiment': ['Positive', 'Neutral', 'Negative'],
-                'Score': [
-                    results.total_positive,
-                    results.total_neutral,
-                    results.total_negative
-                ]
-            })
-            
-            colors = ['#2ecc71', '#74B9FF', '#e74c3c']
-            
-            fig = go.Figure(data=[go.Pie(
-                labels=data['Sentiment'],
-                values=data['Score'],
-                hole=.4,
-                marker_colors=colors
-            )])
-            
-            fig.update_layout(
-                title=f'Sentiment Distribution for {selected_stock}',
-                annotations=[dict(text=f'{selected_stock}', x=0.5, y=0.5, font_size=20, showarrow=False)],
-                height=500
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # pie chart
+        data = pd.DataFrame({
+            'Sentiment': ['Positive', 'Neutral', 'Negative'],
+            'Score': [
+                results.total_positive,
+                results.total_neutral,
+                results.total_negative
+            ]
+        })
+        
+        colors = ['#2ecc71', '#74B9FF', '#e74c3c']
+        
+        fig = go.Figure(data=[go.Pie(
+            labels=data['Sentiment'],
+            values=data['Score'],
+            hole=.4,
+            marker_colors=colors
+        )])
+        
+        fig.update_layout(
+            title=f'Sentiment Distribution for {selected_stock}',
+            annotations=[dict(text=f'{selected_stock}', x=0.5, y=0.5, font_size=20, showarrow=False)],
+            height=500
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
 
 
         # Fetch the stock data from Yahoo Finance using yfinance
