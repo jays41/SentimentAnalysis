@@ -214,23 +214,45 @@ with tab1:
         
         colors = ['#2ecc71', '#74B9FF', '#e74c3c']
         
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=data['Sentiment'],
-            y=data['Score'],
-            text=[f'{p:.1f}%' for p in data['Percentage']],
-            textposition='auto',
-            marker_color=colors
-        ))
+        # fig = go.Figure()
+        # fig.add_trace(go.Bar(
+        #     x=data['Sentiment'],
+        #     y=data['Score'],
+        #     text=[f'{p:.1f}%' for p in data['Percentage']],
+        #     textposition='auto',
+        #     marker_color=colors
+        # ))
         
+        # fig.update_layout(
+        #     title=f'Sentiment Analysis Results for {selected_stock}',
+        #     xaxis_title='Sentiment Category',
+        #     yaxis_title='Sentiment Score',
+        #     template='plotly_white',
+        #     height=500
+        # )
+        
+        # st.plotly_chart(fig, use_container_width=True)
+        
+        fig = go.Figure()
+
+        fig.add_trace(go.Bar(
+            x=['Positive', 'Neutral', 'Negative'],
+            y=[results.total_positive, results.total_neutral, results.total_negative],
+            text=[f'{p:.1f}%' for p in (np.array([results.total_positive, results.total_neutral, results.total_negative]) / sum([results.total_positive, results.total_neutral, results.total_negative]) * 100)],
+            textposition='auto',
+            marker_color=['#2ecc71', '#74B9FF', '#e74c3c']
+        ))
+
         fig.update_layout(
             title=f'Sentiment Analysis Results for {selected_stock}',
             xaxis_title='Sentiment Category',
             yaxis_title='Sentiment Score',
+            autosize=True,  # Forces a refresh
             template='plotly_white',
-            height=500
+            height=500,
+            newshape=dict(line=dict(color='black'))  # Ensures full refresh
         )
-        
+
         st.plotly_chart(fig, use_container_width=True)
         
         # pie chart
