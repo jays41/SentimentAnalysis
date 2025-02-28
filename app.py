@@ -113,6 +113,7 @@ with tab1:
             if results.headline_count == 0:
                 success = False
                 results = Results()
+    
     st.write(results.toString())
     
     # Analysis section
@@ -192,6 +193,7 @@ with tab1:
             st.info("Click 'Analyze Sentiment' to run the analysis")
 
     if results.analysis_complete:
+        st.write(results.toString())
         # bar chart
         data = pd.DataFrame({
             'Sentiment': ['Positive', 'Neutral', 'Negative'],
@@ -227,6 +229,8 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
         
         # pie chart
+        st.write(results.toString())
+        
         data = pd.DataFrame({
             'Sentiment': ['Positive', 'Neutral', 'Negative'],
             'Score': [
