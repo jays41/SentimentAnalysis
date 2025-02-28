@@ -113,6 +113,7 @@ with tab1:
             if results.headline_count == 0:
                 success = False
                 results = Results()
+    st.write(results.toString())
     
     # Analysis section
     col1, col2 = st.columns([2, 1])
@@ -191,8 +192,6 @@ with tab1:
             st.info("Click 'Analyze Sentiment' to run the analysis")
 
     if results.analysis_complete:
-        
-    
         # bar chart
         data = pd.DataFrame({
             'Sentiment': ['Positive', 'Neutral', 'Negative'],

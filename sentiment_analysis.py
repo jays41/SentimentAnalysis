@@ -21,6 +21,16 @@ class Results:
   headline_count = -1
   headlines = []
   analysis_complete = False
+  
+  def toString(self):
+    # for debugging purposes  
+    return f"""total_positive = {self.total_positive}
+          total_neutral = {self.total_neutral}, 
+          total_negative = {self.total_negative}, 
+          score = {self.score}, 
+          headline_count = {self.headline_count}, 
+          analysis_complete = {self.analysis_complete}"""
+
 
 class Config:
   # Sentiment Analysis settings
