@@ -351,7 +351,8 @@ with tab1:
             )
 
             # Show interactive chart
-            st.plotly_chart(fig, use_container_width=True)
+            # st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key=f"chart_{int(time.time())}")
         else:
             st.error("No data found for the given ticker. Please try a different one.")
 
