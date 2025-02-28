@@ -40,7 +40,6 @@ st.title(f"Stock Sentiment Analysis")
 selected_stock = st.text_input("Enter a stock symbol:").upper()
 if selected_stock:
     st.write(f"Selected stock: {selected_stock}")
-    st.rerun()
 
 
 st.sidebar.subheader("Settings")
@@ -118,7 +117,6 @@ with tab1:
         if results.headline_count == 0:
             success = False
             results = Results()
-        st.rerun()
     
     # Analysis section
     col1, col2 = st.columns([2, 1])
