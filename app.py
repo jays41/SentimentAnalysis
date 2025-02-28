@@ -227,6 +227,7 @@ with tab1:
             height=500
         )
         
+        fig.update_layout(autosize=True)
         st.plotly_chart(fig, use_container_width=True)
         
         # pie chart
@@ -257,7 +258,7 @@ with tab1:
             annotations=[dict(text=f'{selected_stock}', x=0.5, y=0.5, font_size=20, showarrow=False)],
             height=500
         )
-        
+        fig.update_layout(autosize=True)
         st.plotly_chart(fig, use_container_width=True)
 
 
