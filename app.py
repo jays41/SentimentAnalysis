@@ -340,6 +340,7 @@ with tab1:
         #     st.error("No data found for the given ticker. Please try a different one.")
         
         if not data.empty:
+            st.write(data.head())
             # Reset the index to ensure 'Date' is a column
             data.reset_index(inplace=True)
 
