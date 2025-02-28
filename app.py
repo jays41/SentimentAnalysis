@@ -123,6 +123,7 @@ with tab1:
     
     with col1:
         if success:
+            st.cache_data.clear()
             # Display sentiment gauge chart
             st.subheader("Sentiment Score")
             
