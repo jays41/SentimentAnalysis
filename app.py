@@ -5,6 +5,7 @@ Run with: streamlit run app.py
 
 import streamlit as st
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
@@ -17,6 +18,7 @@ import traceback
 import plotly.express as px
 import plotly.io as pio
 pio.renderers.default = "browser"
+matplotlib.use("Agg")
 
 # Import from existing script
 from sentiment_analysis import Config, SentimentAnalyser, NewsScraper, Results
